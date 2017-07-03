@@ -12,12 +12,19 @@ void printCudaLastError(){
     cudaError_t err=cudaGetLastError();
     printf("cudaGetLastError::%s(code:%d)\n",cudaGetErrorString(err),err);
 }
+
 void checkCudaStatus(){
     cudaError_t err=cudaGetLastError();
     if(err){
         printf("checkCudaStatus::%s(code:%d)\n",cudaGetErrorString(err),err);
         exit(0);
     }
+}
+
+int get_sm_count(){
+	cudaDeviceProp props;
+	cudaGetDeviceProperties(&props, 0);
+	return props.multiProcessorCount;
 }
 
 template<class T>
@@ -29,11 +36,6 @@ float occupancy(T func,int threadNum){
 	return ((float)numBlocks*threadNum/props.maxThreadsPerMultiProcessor);
 }
 
-int get_sm_count(){
-	cudaDeviceProp props;
-	cudaGetDeviceProperties(&props, 0);
-	return props.multiProcessorCount;
-}
 template<class T>
 int get_activeblock_per_device(T func,int threadNum){
     int numBlocks;

@@ -19,6 +19,16 @@ __device__ __forceinline__ int get_sm_num(){
 	return NSMID;
 }
 
+__device__ __forceinline__ unsigned int BFE(unsigned int source, unsigned int bit_start, unsigned int num_bits){
+    unsigned int bits;
+    asm volatile("bfe.u32 %0, %1, %2, %3;" : "=r"(bits) : "r"(source), "r"(bit_start), "r"(num_bits));
+    return bits;
+}
+// __device__ __forceinline__ unsigned long long int BFE(unsigned long long int source, unsigned int bit_start, unsigned int num_bits){
+//     const unsigned long long MASK = (1ull << num_bits) - 1;
+//     return (source >> bit_start) & MASK;
+// }
+
 
 // PREFIX-SUM in SUM
 template <typename T>
