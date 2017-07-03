@@ -20,7 +20,6 @@ __device__ __forceinline__ int get_sm_num(){
 }
 
 
-
 // PREFIX-SUM in SUM
 template <typename T>
 __device__ __forceinline__ T warp_sum(const T val,const int laneId){
