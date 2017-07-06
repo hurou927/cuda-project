@@ -8,20 +8,21 @@
 
 #define NUMTHREADS 128
 
-__global__ void kernel(const int* __restrict__ IN, int *OUT){
+__global__ void kernel(const int* __restrict__ GIN, int *GOUT){
 	int laneId = threadIdx.x & 0x1F;
 	int warpId = threadIdx.x >> 5;
 	int tx = blockDim.x*blockIdx.x+threadIdx.x;
 
 	__shared__ int s_mem[NUMTHREADS];
-	s_mem[threadIdx.x]=IN[tx];
+	s_mem[threadIdx.x]=GIN[tx];
 	__syncthreads();
 	int val = s_mem[threadIdx.x];
 	val = warp_scan<32>(val,laneId);
 	val = warp_sum(val,laneId);
 	val = block_scan<int, NUMTHREADS>(val,warpId,laneId);
 	val = block_sum <int, NUMTHREADS>(val,warpId,laneId);
-	OUT[tx]=val;
+	GOUT[tx]=val;
+	__threadfence();
 }
 
 int main(int argc,char **argv){
@@ -30,7 +31,7 @@ int main(int argc,char **argv){
 
 	int numthreads= NUMTHREADS;
 	int numblocks = 256;
-	
+
 	size_t num_items = (size_t) numblocks*numthreads;
 	//host memory
 	int *h_in=(int *)malloc(sizeof(int)*num_items);
@@ -49,7 +50,7 @@ int main(int argc,char **argv){
 	cudaMemcpy(d_in,h_in,sizeof(int)*num_items,cudaMemcpyHostToDevice);
 	// memset
 	ts.stamp();
-	cudaMemset(d_in,0,sizeof(int)*num_items);
+	cudaMemset(d_out,0,sizeof(int)*num_items);
 	//kernel
 	ts.stamp();
 	kernel <<< numblocks , numthreads >>> (d_in,d_out);
