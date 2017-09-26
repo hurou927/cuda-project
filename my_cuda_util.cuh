@@ -22,6 +22,13 @@ struct Log2<N, 0, COUNT>{
 };
 
 
+#if CUDART_VERSION >= 9000
+template <typename T>
+__device__ __forceinline__ T warpShuffleIdx(const T var,const  int srcLane,const  int width){
+	return __shfl_sync(0xFFFFFFFF,var,srcLane,width);
+}
+#else
+
 template <typename T>
 __device__ __forceinline__ T warpShuffleIdx(const T var,const  int srcLane,const  int width){
     T output;
@@ -82,4 +89,7 @@ __device__ __forceinline__  double warpShuffleIdx(const double var,const  int sr
     asm volatile("mov.b64 %0, {%1, %2};" : "=d"(output) : "r"(lo), "r"(hi));
     return output;
 }
+#endif
+
+
 #endif

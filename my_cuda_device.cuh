@@ -101,4 +101,37 @@ __device__ __forceinline__ T block_scan(T val,const int warpId,const int laneId)
 	}
 	return sum;
 }
+
+// PREFIX-SUM in block
+// THREAD_NUM must be multiples of 32. --> 64 96 128...
+// shared buffer warpSum
+template<typename T, int THREAD_NUM>
+__device__ __forceinline__ T block_scan(T val,const int warpId,const int laneId, T *warpSum){
+    //(1<<Log2< ELE_NUM >::VALUE)
+    //(1<<Log2< (ELE_NUM>>5) >::VALUE)
+//	__shared__ T warpSum[ THREAD_NUM>>5 ];
+	T sum=warp_scan<32>(val,laneId);
+	if( laneId == 31){
+		warpSum[warpId] = sum;
+	}
+	__syncthreads();
+    if(THREAD_NUM>64){
+	    if(warpId==0){
+		    T val = 0;
+		    if(laneId < (THREAD_NUM>>5) )
+			    val = warpSum[laneId];
+
+            val = warp_scan < (THREAD_NUM>>5) > (val,laneId);
+
+		    if(laneId < (THREAD_NUM>>5))
+			    warpSum[laneId] = val;
+	    }
+	    __syncthreads();
+    }
+	if(warpId > 0){
+		sum += warpSum[warpId-1];
+	}
+	return sum;
+}
+
 #endif

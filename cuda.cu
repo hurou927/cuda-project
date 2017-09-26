@@ -28,7 +28,7 @@ __global__ void kernel(const int* __restrict__ GIN, int *GOUT){
 int main(int argc,char **argv){
 	cudaProfilerStart();
 	cudatimeStamp ts(10);
-
+	printf("%d\n",CUDART_VERSION);
 	int numthreads= NUMTHREADS;
 	int numblocks = 256;
 
