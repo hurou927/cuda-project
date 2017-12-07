@@ -2,9 +2,9 @@
 #include <cstdlib>
 #include <cuda_profiler_api.h>
 
-#include "my_gettime.hpp"
-#include "my_cuda_device.cuh"
-#include "my_cuda_host.cuh"
+#include "header/my_gettime.hpp"
+#include "header/my_cuda_device.cuh"
+#include "header/my_cuda_host.cuh"
 
 #define NUMTHREADS 128
 
