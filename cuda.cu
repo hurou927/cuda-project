@@ -5,6 +5,7 @@
 #include "header/my_gettime.hpp"
 #include "header/my_cuda_device.cuh"
 #include "header/my_cuda_host.cuh"
+#include "header/fp16_dev.h"
 
 #define NUMTHREADS 128
 
@@ -22,10 +23,13 @@ __global__ void kernel(const int* __restrict__ GIN, int *GOUT){
 	val = block_scan<int, NUMTHREADS>(val,warpId,laneId);
 	val = block_sum <int, NUMTHREADS>(val,warpId,laneId);
 	GOUT[tx]=val;
+
+
+
 	__threadfence();
 }
 
-int main(int argc,char **argv){
+void execGPUkerenel(){
 	cudaProfilerStart();
 	cudatimeStamp ts(10);
 	printf("%d\n",CUDART_VERSION);
@@ -66,9 +70,20 @@ int main(int argc,char **argv){
 	printf("occupancy,%4.3f,SMcount,%d,activeblock,%d\n",occupancy(kernel,NUMTHREADS),get_sm_count(),get_activeblock_per_device(kernel,NUMTHREADS));
 
 	//memory free
-	//free(h);
-	//cudaFree(d);
+	free(h_in);
+	free(h_out);
+	cudaFree(d_in);
+	cudaFree(d_out);
 
 	cudaProfilerStop();
+
+}
+
+int main(int argc,char **argv){
+	
+	GPUBoost(1);
+
+	execGPUkerenel();
+
 	return 0;
 }
