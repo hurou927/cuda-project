@@ -1,3 +1,7 @@
+//
+// cooperative_group
+//   -> nvcc ... -rdc = true  and require TCC mode
+//
 #include <cstdio>
 #include <cstdlib>
 #include <cuda_profiler_api.h>
@@ -47,6 +51,10 @@ void execGPUkerenel(){
 	int *d_out;
 	cudaMalloc((void **)&d_out,sizeof(int)*num_items);
 
+	// Change dynamic Shared memory size (CC7.0~)
+	//int maxbytes = 98304; // 96 KB 
+	//cudaFuncSetAttribute(kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, maxbytes);
+
 	//error check
 	checkCudaStatus();
 	//memcpy Host->Device
@@ -57,6 +65,9 @@ void execGPUkerenel(){
 	cudaMemset(d_out,0,sizeof(int)*num_items);
 	//kernel
 	ts.stamp();
+	// cooperativeKernel (Pascal~)
+	// void **args = { (void*)&d_in , (void*)&d_out  };
+	// cudaLaunchCooperativeKernel(kernel, numblocks, numthreads, args);
 	kernel <<< numblocks , numthreads >>> (d_in,d_out);
 
 	ts.stamp();
