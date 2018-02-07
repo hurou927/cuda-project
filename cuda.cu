@@ -33,7 +33,7 @@ __global__ void kernel(const int* __restrict__ GIN, int *GOUT){
 	__threadfence();
 }
 
-void execGPUkerenel(){
+void execGPUkernel(){
 	cudaProfilerStart();
 	cudatimeStamp ts(10);
 	printf("%d\n",CUDART_VERSION);
@@ -94,7 +94,7 @@ int main(int argc,char **argv){
 	
 	GPUBoost(1);
 
-	execGPUkerenel();
+	execGPUkernel();
 
 	return 0;
 }
